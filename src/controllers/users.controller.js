@@ -1,7 +1,8 @@
 const md5 = require('md5');
 const User = require('../models/user');
 const jwt = require('jsonwebtoken');
-const { jwtSecret } = require('../config/enviroment/index')
+const { jwtSecret } = require('../config/environment/index');
+const Post = require('../models/post');
 
 class UserController {
 
@@ -25,7 +26,7 @@ class UserController {
             password: md5(req.body.password)
         }).then(user => {
             if (!user) {
-                res.status(401);
+                res.sendStatus(401);
                 return;
             }
 
@@ -39,7 +40,8 @@ class UserController {
             });
         })
         .catch((err) => {
-            res.status(500).send(err)
+            console.log(err);
+            res.sendStatus(500);
         });
     }
 
@@ -62,25 +64,61 @@ class UserController {
     }
 
     static me(req, res) {
+        res.send(req.user);
+    }
+
+    static async posts(req, res) {
+        const { username } = req.params;
         try {
-            const payload = jwt.verify(req.body.token, jwtSecret);
-            User.findById(payload._id)
-                .then(user => {
-                    if (!user) {
-                        res.sendStatus(401);
-                        return;
-                }
-                res.send({
-                    _id: user.id,
-                    username: user.username,
-                    email: user.email
-                });
-            }).catch(err => {
-                console.log(err);
-                res.sendStatus(500)
-            });
+            const user = await User.findOne({ username });
+            if (!user) {
+                res.sendStatus(404);
+                return;
+            }
+
+            const posts = await Post
+            .find({ user: user._id })
+            .populate('user', ['username', 'avatar']);
+            res.json(posts);
         } catch(err) {
-            res.sendStatus(401);
+            console.log(err);
+            res.sendStatus(500);
+        }  
+    }
+
+    static async get(req, res) {
+        const { username } = req.params;
+        try {
+            const user = await User.findOne({ username });
+            if (!user) {
+                res.sendStatus(404);
+                return;
+            }
+            const { _id, avatar } = user;
+            res.json({_id, username, avatar });
+        } catch(err) {
+            console.log(err)
+            res.sendStatus(500);
+        }
+    }
+
+    static async getAll(req, res) {
+        const { username } = req.query;
+        try {
+            const users = await User.find({
+                username: new RegExp(username, 'i')
+            });
+            res.json(users.map(user => ({
+                    _id: user._id,
+                    username: user.username,
+                    avatar: user.avatar,
+                    bio: user.bio,
+                    createdAt: user.createdAt
+                })
+            ));
+        } catch(err) {
+            console.log(err);
+            res.sendStatus(500);
         }
     }
 }
