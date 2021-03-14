@@ -20,7 +20,6 @@ class UserController {
     }
 
     static login(req, res) {
-        console.log(req.body);
         User.findOne({
             username: req.body.username,
             password: md5(req.body.password)
@@ -51,12 +50,12 @@ class UserController {
             res,sendStatus(400);
             return;
         }
-        let property = emeil ? 'email' : 'username';
+        let property = email ? 'email' : 'username';
         try {
             User.exists({
                 [property]: req.query[property]
             }).then(isExist => {
-                req.json(isExist);
+                res.json(isExist);
             });
         } catch(err) {
             res.status(400).json(err);

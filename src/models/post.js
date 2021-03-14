@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const Post = mongoose.model('Post', {
-    userId: {
+    user: {
         type: mongoose.ObjectId,
         required: true,
         ref: 'User'
