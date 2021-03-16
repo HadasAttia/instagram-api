@@ -14,8 +14,11 @@ routes.get('/user/:username/posts', auth, UserController.posts);
 routes.get('/user/:username', auth, UserController.get);
 routes.get('/user', auth, UserController.getAll);
 
+routes.get('/post/:id/comment', auth, PostsController.getComments);
 routes.get('/post', auth, PostsController.feed);
 routes.put('/post', auth, upload.single('image'), PostsController.create);
 routes.get('/post/:id', auth, PostsController.get);
+routes.put('/post/:id/comment', auth, PostsController.addComment);
+
 
 module.exports = routes;

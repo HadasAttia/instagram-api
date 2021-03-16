@@ -1,5 +1,6 @@
 const fs = require('fs').promises;
 const Post = require('../models/post');
+const Comment = require('../models/comment');
 
 class PostsController {
 
@@ -49,6 +50,37 @@ class PostsController {
                 return;
             }
             res.send(post);
+        } catch(err) {
+            console.log(err);
+            res.sendStatus(500);
+        }
+    }
+
+    static async addComment(req, res) {
+        const postId = req.params.id;
+        const { content } = req.body;
+        const userId = req.user._id;
+
+        try {
+            const comment = new Comment({
+                postId,
+                content,
+                user: userId
+            });
+            const savedComment = await comment.save();
+            res.status(201).send(savedComment);
+        } catch(err) {
+            console.log(err);
+            res.sendStatus(400);
+        }
+    }
+
+    static async getComments(req, res) {
+        const postId = req.params.id;
+        try {
+            const comments = Comment.find({ postId })
+                .populate('user', ['username', 'avatar']);
+            res.send(comments);
         } catch(err) {
             console.log(err);
             res.sendStatus(500);
