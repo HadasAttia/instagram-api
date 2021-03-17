@@ -120,6 +120,35 @@ class UserController {
             res.sendStatus(500);
         }
     }
+
+    static async follow(req, res) {
+        const userId = req.params.id;
+        const followerUserId = req.user._id;
+        if (userId === followerUserId) {
+            res.sendStatus(400);
+            return;
+        }
+        const user = await User.findOneAndUpdate(
+            userId,
+            {
+                $addToSet: {
+                    followers: followerUserId
+                }
+            },
+            {
+                new: true
+            }
+        );
+        if (!user) {
+            res.sendStatus(404);
+            return;
+        }res.send({
+            _id: user._id,
+            username: user.username,
+            avatar: user.avatar,
+            followers: user.followers
+        });
+    }
 }
 
 module.exports = UserController;

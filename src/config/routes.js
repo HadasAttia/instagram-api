@@ -13,6 +13,7 @@ routes.get('/user/check', UserController.check);
 routes.get('/user/:username/posts', auth, UserController.posts);
 routes.get('/user/:username', auth, UserController.get);
 routes.get('/user', auth, UserController.getAll);
+routes.post('user/:id/follow', auth, UserController.follow);
 
 routes.get('/post/:id/comment', auth, PostsController.getComments);
 routes.get('/post', auth, PostsController.feed);
