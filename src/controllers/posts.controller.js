@@ -18,7 +18,7 @@ class PostsController {
     }
 
     static async create(req, res) {
-        const fileName = req.file.fileName;
+        const fileName = req.file.filename;
         try {
             const imageBase64 = await fs.readFile('public/posts/' + fileName, {
                 encoding: 'base64'
@@ -50,6 +50,28 @@ class PostsController {
                 return;
             }
             res.send(post);
+        } catch(err) {
+            console.log(err);
+            res.sendStatus(500);
+        }
+    }
+
+    static async like(req, res) {
+        try {
+            const { id } = req.params;
+            const post = await Post.findByIdAndUpdate(id, { $addToSet: { likes: req.user._id } }, { new: true });
+            res.status(200).send(post);
+        } catch(err) {
+            console.log(err);
+            res.sendStatus(500);
+        }
+    }
+
+    static async unlike(req, res) {
+        try {
+            const { id } = req.params;
+            const post = await Post.findByIdAndUpdate(id, { $pull: { likes: req.user._id } }, { new: true });
+            res.status(200).send(post);
         } catch(err) {
             console.log(err);
             res.sendStatus(500);
